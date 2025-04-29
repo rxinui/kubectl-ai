@@ -16,10 +16,10 @@
 
 name: eval-tasks
 on:
-  workflow_run:
-    workflows: ["ci-presubmit"]
-    types:
-      - completed # can be in_progress to speed up
+  pull_request:
+    types: [opened, synchronize, reopened]
+  push:
+    branches: [main]
 jobs:
   run-eval-tasks:
     runs-on: ubuntu-latest
@@ -47,7 +47,12 @@ jobs:
           cd k8s-bench
           go build
           chmod +x k8s-bench
-          ./k8s-bench run --agent-bin ./kubectl-ai --task-pattern scale --output-dir=./
+          ./k8s-bench run --agent-bin ./kubectl-ai --task-pattern=scale --output-dir=./ --llm-provider="ollama"
+      - name: Analyse results
+        run: |
+          cd k8s-bench
+          ./k8s-bench analyze --input-dir=./ --results-filepath=./results.md
+          cat ./results.md >> $GITHUB_STEP_SUMMARY
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.ref }}
