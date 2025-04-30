@@ -34,6 +34,17 @@ jobs:
         run: go build && chmod +x kubectl-ai
       - name: Install ollama
         run: curl -fsSL https://ollama.com/install.sh | sh
+      # - name: Install ollama
+      #   run: |
+      #     curl -L https://ollama.com/download/ollama-linux-amd64.tgz -o ollama-linux-amd64.tgz
+      #     tar -xzf ollama-linux-amd64.tgz
+      #     mv ./bin/ollama ./ollama
+      #     chmod +x ollama
+      - name: Run ollama gemma3:1b
+        run: |
+          # ./ollama serve &
+          ollama pull gemma3:1b
+          ollama run gemma3:1b
       - name: Run prompt on k8s-bench
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
@@ -41,7 +52,7 @@ jobs:
           cd k8s-bench
           go build
           chmod +x k8s-bench
-          ./k8s-bench run --agent-bin=../kubectl-ai --task-pattern=scale --output-dir=./ --llm-provider="ollama"
+          ./k8s-bench run --agent-bin=../kubectl-ai --llm-provider="ollama" --models="gemma3:1b" --task-pattern=scale --output-dir=./ 
       - name: Analyse results
         run: |
           cd k8s-bench
