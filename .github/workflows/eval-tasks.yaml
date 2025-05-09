@@ -18,8 +18,9 @@ name: eval-tasks
 on:
   pull_request:
     types: [opened, synchronize, reopened]
-  push:
     branches: [main]
+  schedule:
+    - cron: "0 */4 * * *"
 jobs:
   run-eval-tasks:
     runs-on: ubuntu-latest
@@ -40,13 +41,11 @@ jobs:
           ollama pull ${{ vars.OLLAMA_MODEL }}
           ollama run ${{ vars.OLLAMA_MODEL }}
       - name: Run prompt on k8s-bench
-        env:
-          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
         run: |
           cd k8s-bench
           go build
           chmod +x k8s-bench
-          ./k8s-bench run --agent-bin=../kubectl-ai --llm-provider="ollama" --models="${{ vars.OLLAMA_MODEL }}" --task-pattern=scale --output-dir=./
+          ./k8s-bench run --agent-bin=../cmd/kubectl-ai --llm-provider="ollama" --models="${{ vars.OLLAMA_MODEL }}" --task-pattern=scale --output-dir=./
       - name: Analyse results
         run: |
           cd k8s-bench
