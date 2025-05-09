@@ -18,8 +18,9 @@ name: eval-tasks
 on:
   pull_request:
     types: [opened, synchronize, reopened]
-  push:
     branches: [main]
+  schedule:
+    - cron: "0 */4 * * *"
 jobs:
   run-eval-tasks:
     runs-on: ubuntu-latest
